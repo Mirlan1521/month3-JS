@@ -1,20 +1,28 @@
-const baseURL = 'https://api.tvmaze.com/';
+let baseURL = 'https://api.tvmaze.com/shows'
 
-const endpoints = {
-    shows: 'shows'
-};
-
-const state = {
-    products: null
+function sendRequest(method, baseURL){
+  return new Promise((resolve, reject) =>{
+    const xhr = new XMLHttpRequest()
+    xhr.open(method, baseURL)
+    xhr.responseType = 'json'
+    xhr.onload = () => {
+  if (xhr.status >=400){
+    reject(xhr.response)
+  }else{
+    resolve(xhr.response)
+  }
+}
+xhr.onerror = ()=> {
+    reject(xhr.response)
+}
+xhr.send()
+  })
 }
 
-function getAllShows() {
-    fetch(`${baseURL}${endpoints.shows}`, {
-        method: 'GET'
-    }).then((response) =>{
-       return response.json();
-    }).then((data) =>{
-        state.products = data;
+
+sendRequest('GET', baseURL)
+.then((data) =>{
+
         const shows = document.querySelector('.shows')
         data.forEach(show=>{
             const show_block = `
@@ -40,24 +48,5 @@ function getAllShows() {
 
         })
     })
-}
 
 
-getAllShows();
-
-function filterShowsByGenre(genre){
-    for(let show of state.products){
-        if(!show.genres.find(g => g === genre)){
-            state.products = state.products.filter(p => console.log(p.id, show.id))
-        }
-    }
-    console.log(state.products)
-}
-
-
-let select = document.querySelector('select')
-select.addEventListener('change',function () {
-    if (select.value === '2') {
-        filterShowsByGenre('crime')
-    }
-})
